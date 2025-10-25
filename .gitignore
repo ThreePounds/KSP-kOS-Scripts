@@ -2,4 +2,7 @@
 *.bat
 
 # Misc Scripts
-/misc/*
+/misc
+
+# Logs
+/logs
