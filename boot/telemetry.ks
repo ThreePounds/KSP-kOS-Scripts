@@ -1,59 +1,91 @@
 @LAZYGLOBAL off.
 
-local telemetrylog_file is "".
-local logging_interval is 1.
-local last_logging_time is 0.
+local telemetryLogPath is path("0:/log/").
+local loggingInterval is 1.
+local lastLoggingTime is 0.
 
-// START
+local hasTempSensor is FALSE.
+local hasPresSensor is FALSE.
 
 wait until ship:unpacked.
 
-print "Initializing Telemetry file".
-initialize_telemetry().
-
-until false {
-    if time:seconds > last_logging_time + logging_interval {
-        print "Logging data to file".
-        set last_logging_time to time:seconds.
-        log_telemetry().
-    }
+print "checking vessel".
+checkForSensors().
+if hasTempSensor {
+    print "Found Temperature sensor, logging.".
+} else {
+    print "No Temperature sensor found.".
+}
+if hasPresSensor {
+    print "Found Pressure sensor, logging.".
+} else {
+    print "No Pressure sensor found.".
 }
 
-function initialize_telemetry {
+print "Initializing Telemetry file".
+initializeTelemetry().
+
+until false {
+    
+    if time:seconds > lastLoggingTime + loggingInterval {
+        print "Logging data to file".
+        set lastLoggingTime to time:seconds.
+        logTelemetry().
+    }
+    wait 0.
+}
+
+function initializeTelemetry {
     local yearstring is time:year + "".
     local daystring is time:day + "".
     local clockstring is time:clock:replace(":","-").
 
-    set telemetrylog_file to "0:/logs/Y" + yearstring:padleft(3):replace(" ","0") + "D" + daystring:padleft(3):replace(" ","0") + "_" + clockstring + ".log".
-    local record is "time,longitude,latitude,altitude,temperature,pressure".
+    set telemetryLogPath to telemetryLogPath:combine("Y" + yearstring:padleft(3):replace(" ","0") + "D" + daystring:padleft(3):replace(" ","0") + "_" + clockstring + ".csv").
+    local record is "time,longitude,latitude,altitude".
 
-    if not exists(telemetrylog_file) {
-        create(telemetrylog_file).
+    if not exists(telemetryLogPath) {
+        create(telemetryLogPath).
     }
 
-    log  record to telemetrylog_file.
+    log  record to telemetryLogPath.
 }
 
-function log_telemetry {
+function logTelemetry {
     local currentTime is round(time:seconds,2).
     local currentLongitude is round(ship:longitude,5).
     local currentLatitude is round(ship:latitude,5).
     local currentAltitude is round(ship:altitude,1).
-    local currentemperature is round(kelvinToCelcius(ship:sensors:temp),1).
-    local currentPressure is round(ship:sensors:pres,1).
+    local currenTemperature is -1.
+    local currentPressure is -1.
+    
+    if hasTempSensor {
+        set currenTemperature to round(kelvinToCelcius(ship:sensors:temp),1).   
+    }
+
+    if hasPresSensor{
+        set currentPressure to round(ship:sensors:pres,1).
+    }
     
     local record is 
         currentTime + "," +
         currentLongitude + "," + 
         currentLatitude + "," + 
         currentAltitude + "," + 
-        currentemperature + "," + 
+        currenTemperature + "," + 
         currentPressure.
     
-    log record to telemetrylog_file.
+    log record to telemetryLogPath.
 }
 
 function kelvinToCelcius {
     parameter kelvin.
     return kelvin - 273.15.
+}
+
+function checkForSensors {
+    local tempSensors is ship:partsnamed("sensorThermometer").
+    local presSensors is ship:partsnamed("sensorBarometer").
+
+    set hasTempSensor to not tempSensors:empty.
+    set hasPresSensor to not presSensors:empty.
 }
