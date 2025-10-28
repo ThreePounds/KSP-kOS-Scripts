@@ -4,25 +4,11 @@ local telemetryLogPath is path("0:/log/").
 local loggingInterval is 1.
 local lastLoggingTime is 0.
 
-local hasTempSensor is FALSE.
-local hasPresSensor is FALSE.
+local hasTempSensor is shipHasPart("sensorThermometer").
+local hasPresSensor is shipHasPart("sensorBarometer").
 
 wait until ship:unpacked.
 
-print "checking vessel".
-checkForSensors().
-if hasTempSensor {
-    print "Found Temperature sensor, logging.".
-} else {
-    print "No Temperature sensor found.".
-}
-if hasPresSensor {
-    print "Found Pressure sensor, logging.".
-} else {
-    print "No Pressure sensor found.".
-}
-
-print "Initializing Telemetry file".
 initializeTelemetry().
 
 until false {
@@ -47,7 +33,7 @@ function initializeTelemetry {
         create(telemetryLogPath).
     }
 
-    log  record to telemetryLogPath.
+    log record to telemetryLogPath.
 }
 
 function logTelemetry {
@@ -55,11 +41,11 @@ function logTelemetry {
     local currentLongitude is round(ship:longitude,5).
     local currentLatitude is round(ship:latitude,5).
     local currentAltitude is round(ship:altitude,1).
-    local currenTemperature is -1.
+    local currentTemperature is -1.
     local currentPressure is -1.
     
     if hasTempSensor {
-        set currenTemperature to round(kelvinToCelcius(ship:sensors:temp),1).   
+        set currentTemperature to round(kelvinToCelcius(ship:sensors:temp),1).   
     }
 
     if hasPresSensor{
@@ -71,7 +57,7 @@ function logTelemetry {
         currentLongitude + "," + 
         currentLatitude + "," + 
         currentAltitude + "," + 
-        currenTemperature + "," + 
+        currentTemperature + "," + 
         currentPressure.
     
     log record to telemetryLogPath.
@@ -82,10 +68,8 @@ function kelvinToCelcius {
     return kelvin - 273.15.
 }
 
-function checkForSensors {
-    local tempSensors is ship:partsnamed("sensorThermometer").
-    local presSensors is ship:partsnamed("sensorBarometer").
-
-    set hasTempSensor to not tempSensors:empty.
-    set hasPresSensor to not presSensors:empty.
+function shipHasPart {
+    parameter part.
+    local partlist is ship:partsnamed(part).
+    return not partlist:empty.
 }
