@@ -23,22 +23,22 @@ global function telemetryConfiguration {
     configurationLex:add("intervall", 1).
     configurationLex:add("sensors", sensorLex).
 
-    configurationLex:addSensor("time", {return time:seconds.}).
+    configurationLex:addSensor("time", {return round(time:seconds,3).}).
     configurationLex:addSensor(
         "temperature", 
-        {return kelvinToCelcius(ship:sensors:temp).},
+        {return kelvinToCelcius(round(ship:sensors:temp,1)).},
         {return shipHasPart("sensorThermometer").}
     ).
 
     configurationLex:addSensor(
         "pressure", 
-        {return kelvinToCelcius(ship:sensors:pres).},
+        {return kelvinToCelcius(round(ship:sensors:pres,1)).},
         {return shipHasPart("sensorBarometer").}
     ).
 
-    configurationLex:addSensor("altitude", {return ship:altitude.}).
-    configurationLex:addSensor("longitude", {return ship:longitude.}).
-    configurationLex:addSensor("latitude", {return ship:latitude.}).
+    configurationLex:addSensor("altitude", {return round(ship:altitude,2).}).
+    configurationLex:addSensor("longitude", {return round(ship:longitude,5).}).
+    configurationLex:addSensor("latitude", {return round(ship:latitude,5).}).
     
     local function shipHasPart {
         parameter part.
@@ -58,39 +58,26 @@ global function startTelemetry {
     set telemetryPath to telemetryPath:combine(ship:rootpart:uid:tostring + "-" + ship:name:replace(" ","_") + ".log").
  
     if not exists(telemetryPath) {
-        local isFirst is true.
-        local header is "". 
+        local header is configuration:sensors:keys:join(","). 
         create(telemetryPath).
         set telemetryFile to open(telemetryPath).
-        for key in configuration:sensors:keys {
-            if isFirst { isFirst off.} else {set header to header + ",".} 
-            set header to header + key.
-        }
         telemetryFile:writeln(header).
     } else { set telemetryFile to open(telemetryPath). }
 
     checkTelemetry(configuration).
     set telemetryActive to TRUE.
     when (time:seconds > lastSendTime + configuration:intervall) then {
-        local record is "".
-        local isFirst is TRUE.
+        local record is list().
         set lastSendTime to time:seconds.
-        for key in configuration:sensors:keys {
-            if isFirst { isFirst off.} else {set record to record + ",".}
-            if configuration:sensors[key]:isActive {
-                set record to record + configuration:sensors[key]:data().
-            } else { 
-                set record to record + "null".
+        for telemetrySensor in configuration:sensors:values {
+                record:add(choose telemetrySensor:data() if telemetrySensor:isActive else -1).
             }
-        }
-        telemetryFile:writeln(record).
+        telemetryFile:writeln(record:join(",")).
         return telemetryActive.
     }
-
     // on ship:stagenum {
     //     checkTelemetry(configuration).
     // }
-
 }
 
 global function stopTelemetry {
