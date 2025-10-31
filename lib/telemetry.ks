@@ -1,7 +1,6 @@
 @LAZYGLOBAL off.
 
 local telemetryActive is FALSE.
-local lastSendTime is 0.
 
 global function telemetryConfiguration {
     local configurationLex is LEX().
@@ -26,7 +25,7 @@ global function telemetryConfiguration {
     configurationLex:addSensor("time", {return round(time:seconds,3).}).
     configurationLex:addSensor(
         "temperature", 
-        {return kelvinToCelcius(round(ship:sensors:temp,1)).},
+        {return round(kelvinToCelcius(ship:sensors:temp),1).},
         {return shipHasPart("sensorThermometer").}
     ).
 
@@ -54,8 +53,9 @@ global function startTelemetry {
     parameter configuration is telemetryConfiguration().
 
     local telemetryFile is 0.
+    local lastSendTime is 0.
 
-    set telemetryPath to telemetryPath:combine(ship:rootpart:uid:tostring + "-" + ship:name:replace(" ","_") + ".log").
+    set telemetryPath to telemetryPath:combine(ship:rootpart:uid:tostring + "-" + ship:name:replace(" ","_") + ".csv").
  
     if not exists(telemetryPath) {
         local header is configuration:sensors:keys:join(","). 
@@ -64,7 +64,7 @@ global function startTelemetry {
         telemetryFile:writeln(header).
     } else { set telemetryFile to open(telemetryPath). }
 
-    checkTelemetry(configuration).
+    checkSensors(configuration).
     set telemetryActive to TRUE.
     when (time:seconds > lastSendTime + configuration:intervall) then {
         local record is list().
@@ -75,19 +75,20 @@ global function startTelemetry {
         telemetryFile:writeln(record:join(",")).
         return telemetryActive.
     }
-    // on ship:stagenum {
-    //     checkTelemetry(configuration).
-    // }
+    on ship:stagenum {
+        checkSensors(configuration).
+        return telemetryActive.
+    }
 }
 
 global function stopTelemetry {
     set telemetryActive to FALSE.
 }
 
-local function checkTelemetry {
+local function checkSensors {
     parameter configuration.
-    for key in configuration:sensors:keys {
-        set configuration:sensors[key]:isActive to configuration:sensors[key]:isAvailable().
+    for telemetrySensor in configuration:sensors:values {
+        set telemetrySensor:isActive to telemetrySensor:isAvailable().
     }
 }
 
