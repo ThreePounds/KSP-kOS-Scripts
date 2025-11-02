@@ -1,4 +1,4 @@
-//#include "0:/lib/telemetry.ks"
+//#include "lib/telemetry.ks"
 @lazyGlobal off.
 
 local propEngineMod is 0.

@@ -1,11 +1,12 @@
-//#include "0:/lib/telemetry.ks"
+//#include "lib/telemetry.ks"
 @lazyGlobal off.
-local launchTime is time:seconds.
 
 local firstStageBurn is 60.
 local secondStageBurn is 60.
-local scienceExperimentMods is List().
+local scienceExperimentMods is ship:modulesnamed("ModuleScienceExperiment").
 local scienceIsDepoloyed is false.
+local isAbort is false.
+local LF is char(10).
 
 
 copypath("0:/lib/telemetry","1:/").
@@ -13,7 +14,6 @@ runoncepath("telemetry").
 
 wait until ship:unpacked.
 
-set scienceExperimentMods to ship:modulesnamed("ModuleScienceExperiment").
 when ship:altitude > 85_000 then {
     for mod in scienceExperimentMods {
         mod:deploy().
@@ -22,15 +22,43 @@ when ship:altitude > 85_000 then {
     }
 }
 
-stage.
-startTelemetry().
+clearScreen.
+print "Launch control and guidance for " + LF + ship:name.
+print "Press [1] to launch." + LF + "Press [Abort] at any time to stop launch sequence".
 
-wait until time:seconds > launchTime + firstStageBurn.
+wait until getSingleInput() = "1".
 
-stage.
+print "Launch Sequence started. Launching in:".
 
-wait until time:seconds > launchTime + firstStageBurn + secondStageBurn.
+from { local countDown is 10. } until countDown = 0 step { set countDown to countDown - 1. } do {
+    wait 1.
+    if abort {
+        print "Launch aborted.".
+        break.
+    }
+    print countDown.
+}
 
-stage.
+if not abort {
+    startTelemetry().
+    local launchTime is time:seconds. 
+    stage.
 
-wait until scienceIsDepoloyed.
+    wait until time:seconds > launchTime + firstStageBurn.
+    stage.
+
+    wait until time:seconds > launchTime + firstStageBurn + secondStageBurn.
+    stage.
+
+    wait until scienceIsDepoloyed.
+}
+
+local function getSingleInput {
+    until false {
+        if terminal:input:haschar {
+            return terminal:input:getchar().      
+        }
+    wait 0.
+    }
+
+}
