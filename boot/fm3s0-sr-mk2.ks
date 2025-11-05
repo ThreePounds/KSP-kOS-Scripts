@@ -5,7 +5,6 @@ local firstStageBurn is 60.
 local secondStageBurn is 60.
 local scienceExperimentMods is ship:modulesnamed("ModuleScienceExperiment").
 local scienceIsDepoloyed is false.
-local isAbort is false.
 local LF is char(10).
 
 
