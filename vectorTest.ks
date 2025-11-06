@@ -3,25 +3,31 @@ print "===vectorTest=== V0.0.4".
 
 clearVecDraws().
 
-local myvec0 is drawUpdateVector({return ship:facing:forevector.},"ship:facing",red).
-local myvec1 is drawUpdateVector({return north:forevector.},"north",blue).
+local targetApoapsis is 85000.
 
+lock surfVelHeadingVec to vxcl(up:forevector, ship:velocity:surface).
+lock surfVelHeadingDir to lookDirUp(surfVelHeadingVec, up:forevector).
+local initalPitch is vAxisAng(
+    ship:velocity:surface:normalized,
+    -up:forevector,
+    surfVelHeadingVec
+    
+).
+local initialApoasis is ship:orbit:apoapsis.
+// lerp pitch to 0 when ship:apoapsis = targetApopsis
+lock targetPitch to (initalPitch * (targetApoapsis - ship:orbit:apoapsis)) / (targetApoapsis - initialApoasis). 
+lock targetDir to surfVelHeadingDir * R(targetPitch,0,0).
 
-lock headingVector to vxcl(up:forevector,ship:facing:forevector).
+lock steering to targetDir.
 
-local myvec2 is drawUpdateVector({return headingVector.},"heading",green).
-
-function compassHeading {
-    local eastVec is vcrs(up:forevector,north:forevector).
-    local headingVec is vxcl(up:forevector,ship:facing:forevector).
-    local trig_x is vDot(eastVec, headingVec).
-    local trig_y is vDot(north:forevector, headingVec).
-    local rawHeading is arcTan2(trig_x, trig_y).
-    if rawHeading > 0 {
-        return rawHeading.
-    } else {
-        return 360 + rawHeading.
-    }
+print "compassHeading: ".
+print "inital pitch:   " + round(initalPitch,1). 
+print "inital apoasis: " + round(initialApoasis).
+print "target pitch:   ".
+until false {
+    print round(compassHeading()):tostring:padleft(3):replace(" ","0") + "°" at (16,6).
+    print round(targetPitch,1) at (16,9).
+    wait 0.
 }
 
 function drawUpdateVector {
@@ -54,8 +60,25 @@ function drawSimpleVector {
     return drawvector.
 }
 
-print "compassHeading:".
-until false {
-    print round(compassHeading()):tostring:padleft(3):replace(" ","0") + "°" at (16,6).
-    wait 0.
+function vAxisAng {
+    parameter vector.
+    parameter axisy. // angle is positive in this direction
+    parameter axisx. // axis this angle is relative to
+    local trig_y is vDot(axisy, vector).
+    local trig_x is vDot(axisx, vector).
+    return arcTan(trig_y, trig_x).
 }
+
+function compassHeading {
+    local rawHeading is vAxisAng(
+        ship:facing:forevector,
+        -up:starvector, // = east
+        north:forevector
+    ).
+    if rawHeading > 0 {
+        return rawHeading.
+    } else {
+        return 360 + rawHeading.
+    }
+}
+
