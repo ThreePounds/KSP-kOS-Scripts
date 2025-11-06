@@ -1,7 +1,7 @@
 @lazyGlobal off.
 
 local importlist is list(
-    "lv-t05-2-1r-stayputnik.ks"
+    "simpleProbeLaunch.ks"
 ).
 
 local filelist is list().
