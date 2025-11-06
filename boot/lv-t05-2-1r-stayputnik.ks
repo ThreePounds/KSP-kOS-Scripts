@@ -1,8 +1,7 @@
 @lazyGlobal off.
 
 local importlist is list(
-    "launch-development.ks"
-    // "syntax-test.ks"
+    "lv-t05-2-1r-stayputnik.ks"
 ).
 
 local filelist is list().
