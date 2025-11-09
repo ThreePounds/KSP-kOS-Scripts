@@ -1,5 +1,5 @@
 @LAZYGLOBAL off.
-print "===lib/telemetry=== V0.0.1".
+printToTerminal("===lib/telemetry=== V0.0.1").
 
 local telemetryActive is FALSE.
 

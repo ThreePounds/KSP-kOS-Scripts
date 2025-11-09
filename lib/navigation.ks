@@ -1,5 +1,5 @@
 @lazyGlobal off.
-print "===lib/navigation=== V0.0.1".
+printToTerminal("===lib/navigation=== V0.0.1").
 
 function vAxisAng {
     parameter vector.

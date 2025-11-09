@@ -3,7 +3,6 @@
 //#include "lib/simpleCountdown.ks"
 //#include "lib/telemetry.ks"
 @lazyGlobal off.
-print "===simpleProbeLaunch=== V1.0.2".
 
 parameter targetApoapsis, stageDurationsList.
 
@@ -26,6 +25,14 @@ stageTime:next().
 
 wait until ship:unpacked.
 
+local scienceModList is list().
+for partName in list("sensorThermometer", "sensorBarometer") {
+    for part in ship:partsnamed(PartName) {
+        scienceModList:add(part:getmodule("ModuleScienceExperiment")).
+        printToTerminal("Experiment added: " + part:title).
+    }
+}
+
 simpleCountdown().
 
 if abort {
@@ -39,8 +46,8 @@ local launchTime is time:seconds.
 
 // time based staging logic
 when time:seconds > launchTime + stageTime:value() then {
-    printToTerminal("Staging. Stage: " + ship:stagenum).
     stage.
+    printToTerminal("Staging. Stage: " + ship:stagenum).
     return stageTime:next().
 }
 
@@ -59,39 +66,22 @@ lock targetPitch to (initalPitch * (targetApoapsis - ship:orbit:apoapsis)) / (ta
 lock targetDir to velHeadingDir * R(targetPitch,0,0).
 lock steering to targetDir.
 
-until ship:altitude > 65_000 {
+until ship:stagenum = initialStage - 3 {
     printDebug().
     wait 0.
 }
-
-printToTerminal("Restarting guidance using orbital velocity").
-lock velHeadingVec to vxcl(up:forevector, ship:velocity:orbit):normalized.
-lock velHeadingDir to lookDirUp(velHeadingVec, up:forevector).
-set initalPitch to vAxisAng(
-    ship:velocity:orbit:normalized,
-    -up:forevector,
-    velHeadingVec
-).
-set initialApoasis to ship:orbit:apoapsis.
-
-until ship:verticalspeed < 0 {
-    printDebug().
-    wait 0.
-}
-
-unlock targetPitch.
-local targetPitch to 0.
-
-until ship:periapsis > 75_000 {
-    printDebug().
-    wait 0.
-}
-
 printToTerminal("Terminating guided ascent").
 lock throttle to 0.
+unlock steering.
+unlock throttle.
+
+wait until ship:verticalspeed < 0.
+for experiment in scienceModList {
+    experiment:deploy.
+    printToTerminal("Deploying " + experiment:part:title).
+}
+
 printToTerminal("Script complete. Goodbye").
-wait 10.
-stage.
 
 function runningSum {
     parameter inputList.
