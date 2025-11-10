@@ -39,8 +39,8 @@ local launchTime is time:seconds.
 
 // time based staging logic
 when time:seconds > launchTime + stageTime:value() then {
-    printToTerminal("Staging. Stage: " + ship:stagenum).
     stage.
+    printToTerminal("Staging. Stage: " + ship:stagenum).
     return stageTime:next().
 }
 
@@ -79,6 +79,7 @@ until ship:verticalspeed < 0 {
     wait 0.
 }
 
+printToTerminal("Activating terminal guidance").
 unlock targetPitch.
 local targetPitch to 0.
 
@@ -87,7 +88,7 @@ until ship:periapsis > 75_000 {
     wait 0.
 }
 
-printToTerminal("Terminating guided ascent").
+printToTerminal("Orbital velocity reached").
 lock throttle to 0.
 printToTerminal("Script complete. Goodbye").
 wait 10.
