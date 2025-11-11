@@ -4,21 +4,25 @@ printToTerminal("===simpleCountdown=== V0.0.1").
 
 parameter countDownDuration is 10.
 
-printToTerminal(
+printToTerminal(list(
     "Launch control and guidance for",
     ship:name,
     "Press [1] to start launch sequence.",
     "Press [Abort] at any time to stop launch sequence"
-).
+)).
 
 wait until getSingleInput() = "1".
 
-printToTerminal("Launch Sequence started", "Launching in: " + countDownDuration + " seconds.").
+printToTerminal(list(
+    "Launch Sequence started",
+    "Launching in: " + countDownDuration + " seconds."
+)).
 
 for countDown in range(countDownDuration,-1) {
     wait 1.
     if abort {
-        printToTerminal(centerHudText("Launch aborted!", 5, red)).
+        printToTerminal("Launch aborted!").
+        centerHudText("Launch aborted!", 5, red).
         abortWithMode("padAbort").
     }
     centerHudText("T-00:00:" + countDown:tostring:padleft(2):replace(" ","0")).
@@ -53,5 +57,4 @@ local function centerHudText {
         colour,
         false
     ).
-    return string.
 }

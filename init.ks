@@ -27,13 +27,14 @@ function execute {
         printToTerminal("Starting phase: " +  index + " of " + (missionPhases:length - 1)).
         storeInPersistent("missionPhaseIndex", index).
         missionPhases[index]:call.
-        // printToTerminal("Phase concluded: " + index).
     }
+    storeInPersistent("missionPhaseIndex", missionPhases:length).
+    printToTerminal("Mission finished. Godspeed").
 }
 
 function abortWithMode {
     parameter mode.
-    storeInPersistent@:bind("abortMode", mode).
+    storeInPersistent("abortMode", mode).
     reboot.
 }
 
@@ -57,27 +58,26 @@ function restoreFromPersisent {
     }
 }
 
-function loadScript {
-    parameter file.
-    local localFilePath is path("1:/" + file).
-    if exists(localFilePath) { return localFilePath.}
-    local archiveFilePath is path("0:/" + file).
-    printToTerminal("Copying: " + archiveFilePath).
-    wait until homeConnection:isconnected.
-    copyPath(archiveFilePath, localFilePath).
-    printToTerminal("Copied to: " + localFilePath).
-    return localFilePath.
-}
+// function loadScript {
+//     parameter file.
+//     local localFilePath is path("1:/" + file).
+//     if exists(localFilePath) { return localFilePath.}
+//     local archiveFilePath is path("0:/" + file).
+//     printToTerminal("Copying: " + archiveFilePath).
+//     wait until homeConnection:isconnected.
+//     copyPath(archiveFilePath, localFilePath).
+//     printToTerminal("Copied to: " + localFilePath).
+//     return localFilePath.
+// }
 
 function printToTerminal {
-    local stringList is list().
-    until false {
-        parameter string is "".
-        if string = "" { break. }
-        stringList:add(string).
-    }
-    for string in stringList {
-        local myTimeStamp is "[" + time:clock + "]".
-        print myTimeStamp + " " + string.
+    parameter input.
+    local myTimeStamp is "[" + time:clock + "]".
+    if input:istype("enumerable") {
+        for string in input {
+            print myTimeStamp + " " + string.
+        }
+    } else {
+        print myTimeStamp + " " + input.
     }
 }
