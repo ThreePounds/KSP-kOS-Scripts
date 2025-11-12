@@ -1,7 +1,7 @@
 @lazyGlobal off.
 printToTerminal("===init=== v0.0.0").
 
-local persistentFilepath is "persistent.json".
+local missionStateFilePath is "persistent.json".
 local missionState is lex().
 
 core:doevent("open terminal").
@@ -10,7 +10,7 @@ set terminal:width to 80.
 function execute {
     parameter missionPhases.
     parameter abortProcedures is lex().
-    restoreFromPersisent().
+    restoreMissionState().
     local abortMode is missionState:abortMode.
     local missionPhaseIndex is missionState:missionPhaseIndex.
     if abortMode {
@@ -25,20 +25,20 @@ function execute {
     }
     for index in range(missionPhaseIndex, missionPhases:length) {
         printToTerminal("Starting phase: " +  index + " of " + (missionPhases:length - 1)).
-        storeInPersistent("missionPhaseIndex", index).
+        storeMissionState("missionPhaseIndex", index).
         missionPhases[index]:call.
     }
-    storeInPersistent("missionPhaseIndex", missionPhases:length).
+    storeMissionState("missionPhaseIndex", missionPhases:length).
     printToTerminal("Mission finished. Godspeed").
 }
 
 function abortWithMode {
     parameter mode.
-    storeInPersistent("abortMode", mode).
+    storeMissionState("abortMode", mode).
     reboot.
 }
 
-function storeInPersistent {
+function storeMissionState {
     parameter key.
     parameter value.
     if missionState:haskey(key) {
@@ -46,12 +46,12 @@ function storeInPersistent {
     } else {
         missionState:add(key, value).
     }
-    writeJson(missionState, persistentFilepath).
+    writeJson(missionState, missionStateFilePath).
 }
 
-function restoreFromPersisent {
+function restoreMissionState {
     local requiredKeys is list ("missionPhaseIndex", "abortMode").
-    if exists(persistentFilepath) { set missionState to readJson(persistentFilepath). }
+    if exists(missionStateFilePath) { set missionState to readJson(missionStateFilePath). }
     if not missionState:istype("Lexicon") { set missionState to lex(). }
     for key in requiredKeys { 
         if not missionState:haskey(key) { missionState:add(key, 0). }
