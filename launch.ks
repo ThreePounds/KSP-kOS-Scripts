@@ -1,6 +1,7 @@
 //#include "init.ks"
+//#include "lib/equipment.ks"
 @lazyGlobal off.
-printToTerminal("===simpleCountdown=== V0.0.1").
+printToTerminal("===launch=== V0.0.0").
 
 parameter countDownDuration is 10.
 
@@ -11,6 +12,12 @@ printToTerminal(list(
     "Press [Abort] at any time to stop launch sequence"
 )).
 
+when abort then {
+    printToTerminal("Launch aborted!").
+    centerHudText("Launch aborted!", 5, red).
+    abortWithMode("padAbort").
+}
+
 wait until getSingleInput() = "1".
 
 printToTerminal(list(
@@ -20,18 +27,25 @@ printToTerminal(list(
 
 for countDown in range(countDownDuration,-1) {
     wait 1.
-    if abort {
-        printToTerminal("Launch aborted!").
-        centerHudText("Launch aborted!", 5, red).
-        abortWithMode("padAbort").
-    }
     centerHudText("T-00:00:" + countDown:tostring:padleft(2):replace(" ","0")).
-    if countDown = 0 {
-        wait 1.
-        printToTerminal(centerHudText("Launch!",5)).
-    }
 }
+wait 1.
+centerHudText("Launch!",5).
+printToTerminal("Launch!").
 
+lock throttle to 1.
+local launchEngines is getStageEngines(ship:stagenum - 1).
+for engine in launchEngines {
+    printToTerminal("Activating: " + engine:title).
+    engine:activate().
+}
+wait 0.
+if failedEngines(launchEngines):length {
+    printToTerminal("Engine failure detected!").
+    wait 1.
+    abortWithMode("padAbort").
+} else { printToTerminal(list("All engines running nominally.", "Releasing launch clamps.")). }
+stage.
 
 local function getSingleInput {
     until false {

@@ -1,7 +1,7 @@
 @lazyGlobal off.
 printToTerminal("===init=== v0.0.0").
 
-local missionStateFilePath is "persistent.json".
+local missionStateFilePath is "missionState.json".
 local missionState is lex().
 
 core:doevent("open terminal").
@@ -58,17 +58,18 @@ function restoreMissionState {
     }
 }
 
-// function loadScript {
-//     parameter file.
-//     local localFilePath is path("1:/" + file).
-//     if exists(localFilePath) { return localFilePath.}
-//     local archiveFilePath is path("0:/" + file).
-//     printToTerminal("Copying: " + archiveFilePath).
-//     wait until homeConnection:isconnected.
-//     copyPath(archiveFilePath, localFilePath).
-//     printToTerminal("Copied to: " + localFilePath).
-//     return localFilePath.
-// }
+function loadScript {
+    parameter file.
+    local localFilePath is path("1:/" + file).
+    if exists(localFilePath) { return localFilePath.}
+    local archiveFilePath is path("0:/" + file).
+    printToTerminal("Copying: " + archiveFilePath).
+    wait until homeConnection:isconnected.
+    copyPath(archiveFilePath, localFilePath).
+    printToTerminal("Copied to: " + localFilePath).
+    printToTerminal("Used Storage: " + round(100 * (1 - core:volume:freespace / core:volume:capacity)) + "%").
+    return localFilePath.
+}
 
 function printToTerminal {
     parameter input.

@@ -3,21 +3,20 @@
 
 wait until homeConnection:isConnected.
 
+if not exists("init.ks") { copyPath("0:init.ks", "1:"). }
+runOncePath("init.ks").
+
 // libaries
 for lib in list(
-    "init.ks"
-){
-    if not exists(lib) {copyPath("archive:" + lib, path():combine(lib)).}
-    runOncePath(lib).
-}
+){ runOncePath(loadScript(lib)). }
 
 // mission scripts
 for script in list(
     "simpleCountdown.ks"
-) {if not exists(script) {copypath("archive:" + script, path():combine(script)).}}
+) loadScript(script).
 
 local missionPhases is list(
-    { run "simpleCountdown"(5). }, // 0
+    { wait 1. }, // 0
     { wait 1. }, // 1
     { wait 1. }, // 2
     { wait 1. }, // 3
