@@ -65,8 +65,12 @@ function loadScript {
     local archiveFilePath is path("0:/" + file).
     printToTerminal("Copying: " + archiveFilePath).
     wait until homeConnection:isconnected.
-    copyPath(archiveFilePath, localFilePath).
-    printToTerminal("Copied to: " + localFilePath).
+    if copyPath(archiveFilePath, localFilePath) {
+        printToTerminal("Copied to: " + localFilePath).
+    } else {
+        printToTerminal("Copying failed.").
+        return "".
+    }
     printToTerminal("Used Storage: " + round(100 * (1 - core:volume:freespace / core:volume:capacity)) + "%").
     return localFilePath.
 }

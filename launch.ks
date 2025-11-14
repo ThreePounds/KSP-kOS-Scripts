@@ -34,7 +34,7 @@ centerHudText("Launch!",5).
 printToTerminal("Launch!").
 
 lock throttle to 1.
-local launchEngines is getStageEngines(ship:stagenum - 1).
+local launchEngines is getEnginesStage(ship:stagenum - 1).
 for engine in launchEngines {
     printToTerminal("Activating: " + engine:title).
     engine:activate().
