@@ -12,7 +12,7 @@ function failedEngines {
     return failureList.
 }
 
-function getStageEngines {
+function getEnginesStage {
     parameter stagenum is ship:stagenum.
     local engineList is list().
     local filteredEngineList is list().
