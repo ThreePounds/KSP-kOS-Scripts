@@ -22,3 +22,9 @@ function compassHeading {
         return 360 + rawHeading.
     }
 }
+
+function DirDifference {
+    parameter direction0.
+    parameter direction1.
+    return direction0:inverse * direction1.
+}

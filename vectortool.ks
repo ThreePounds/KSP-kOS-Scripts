@@ -40,9 +40,14 @@ local sliders is lex().
 local buttons is lex().
 local spacings is list().
 
-local mygui is gui(400).
-set mygui:skin:button:width to 100.
-// local mygui is mygui:addvlayout().
+local vectortool is gui(400).
+set vectortool:skin:button:width to 100.
+set vectortool:style:normal:bg to "gui/bevel_bg.png".
+set vectortool:style:border:h to 7.
+set vectortool:style:border:v to 7.
+set vectortool:skin:button:normal:bg to "gui/button.png".
+set vectortool:skin:button:border:h to 4.
+set vectortool:skin:button:border:h to 4.
 
 local dirlex is lex().
 dirlex:add("North/Up", {return lookDirUp(north:vector, up:vector).}).
@@ -52,16 +57,17 @@ dirlex:add("Surfacecelocity", {return lookDirUp(ship:velocity:surface, up:vector
 dirlex:add("Raw", {return R(0, 0, 0).}).
 dirlex:add("Facing", ship:facing).
 
-local vectordisplaylabel is mygui:addlabel("<b>Display:</b>").
-local basevecscheckbox is mygui:addcheckbox("Coordinate vectors", false).
+local vectordisplaylabel is vectortool:addlabel("<b>Display:</b>").
+local basevecscheckbox is vectortool:addcheckbox("Coordinate vectors", false).
 set basevecscheckbox:ontoggle to toggleVecs@:bind(list(basevec0, basevec1, basevec2)).
-local rotationveccheckbox is mygui:addcheckbox("Direction vectors", false).
+local rotationveccheckbox is vectortool:addcheckbox("Direction vectors", false).
 set rotationveccheckbox:ontoggle to toggleVecs@:bind(list(dirvec0, dirvec1, dirvec2)).
 
-spacings:add(mygui:addspacing(15)).
-local optionslabel is mygui:addlabel("<b>Base Coordinates:</b>").
-local optionshlayout is mygui:addhlayout().
+spacings:add(vectortool:addspacing(15)).
+local optionslabel is vectortool:addlabel("<b>Base Coordinates:</b>").
+local optionshlayout is vectortool:addhlayout().
 local optionsbox is optionshlayout:addpopupmenu.
+spacings:add(optionshlayout:addspacing(-1)).
 local resetfacingbutton is optionshlayout:addbutton("Update facing").
 set resetfacingbutton:onclick to resetFacing@.
 set optionsbox:options to dirlex:keys().
@@ -70,15 +76,15 @@ set optionsbox:style:width to 170.
 displayVectors(optionsbox:value).
 set optionsbox:onchange to displayVectors@.
 
-spacings:add(mygui:addspacing(15)).
+spacings:add(vectortool:addspacing(15)).
 local axishlayouts is lex().
-local axislabel is mygui:addlabel("<b>Rotation:</b>").
+local axislabel is vectortool:addlabel("<b>Rotation:</b>").
 for axis in list("roll", "pitch", "yaw"){
-    labels:add(axis, mygui:addlabel(axis + ": " + dirStruct[axis])).
-    axishlayouts:add(axis, mygui:addhlayout()).
+    labels:add(axis, vectortool:addlabel(axis + ": " + dirStruct[axis])).
+    axishlayouts:add(axis, vectortool:addhlayout()).
     sliders:add(axis, axishlayouts[axis]:addhslider(0, -180, 180)).
     buttons:add(axis, axishlayouts[axis]:addbutton("reset")).
-    spacings:add(mygui:addspacing(15)).
+    spacings:add(vectortool:addspacing(15)).
     set sliders[axis]:onchange to updateLex@:bind(dirStruct, axis).
     set buttons[axis]:onclick to resetAxis@:bind(axis).
     set buttons[axis]:style:width to 50.
@@ -86,17 +92,25 @@ for axis in list("roll", "pitch", "yaw"){
 set labels["roll"]:style:textcolor to yellow.
 set labels["pitch"]:style:textcolor to magenta.
 set labels["yaw"]:style:textcolor to cyan.
-local printhlayout is mygui:addhlayout().
-local printResultButton to printhlayout:addbutton("Print Rotation").
+local printhlayout is vectortool:addhlayout().
+local printResultButton is printhlayout:addbutton("Print Rotation").
 set printResultButton:onclick to {printToTerminal(myrot).}.
-local printRawButton to printhlayout:addbutton("Print Raw").
+printhlayout:addspacing(-1).
+local printRawButton is printhlayout:addbutton("Print Raw").
 set printRawButton:onclick to {printToTerminal(mydir).}.
+printhlayout:addspacing(-1).
+local printDifferenceButton is printhlayout:addbutton("Print Difference").
+set printDifferenceButton:onclick to {
+    local newdir to DirDifference(mydir, baseref).
+    printToTerminal(newdir:inverse).
+    printToTerminal("roll: " + newdir:inverse:roll).
+}.
 
-set mygui:x to guix.
-set mygui:y to guiy.
+set vectortool:x to guix.
+set vectortool:y to guiy.
 // set mygui:skin:font to guifont.
 
-mygui:show().
+vectortool:show().
 
 lock steering to mydir.
 
@@ -140,4 +154,10 @@ function updateLex {
 function resetAxis {
     parameter axis.
     set sliders[axis]:value to 0.
+}
+
+function DirDifference {
+    parameter direction0.
+    parameter direction1.
+    return direction0:inverse * direction1.
 }
