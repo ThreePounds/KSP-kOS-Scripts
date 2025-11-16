@@ -8,7 +8,9 @@ runOncePath("init.ks").
 
 // libaries
 for lib in list(
-    "lib/equipment.ks"
+    "lib/equipment.ks",
+    "lib/navigation.ks",
+    "lib/debug.ks"
 ){ runOncePath(loadScript(lib)). }
 
 // mission scripts

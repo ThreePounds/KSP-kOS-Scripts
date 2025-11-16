@@ -42,12 +42,6 @@ local spacings is list().
 
 local vectortool is gui(400).
 set vectortool:skin:button:width to 100.
-set vectortool:style:normal:bg to "gui/bevel_bg.png".
-set vectortool:style:border:h to 7.
-set vectortool:style:border:v to 7.
-set vectortool:skin:button:normal:bg to "gui/button.png".
-set vectortool:skin:button:border:h to 4.
-set vectortool:skin:button:border:h to 4.
 
 local dirlex is lex().
 dirlex:add("North/Up", {return lookDirUp(north:vector, up:vector).}).
@@ -80,7 +74,7 @@ spacings:add(vectortool:addspacing(15)).
 local axishlayouts is lex().
 local axislabel is vectortool:addlabel("<b>Rotation:</b>").
 for axis in list("roll", "pitch", "yaw"){
-    labels:add(axis, vectortool:addlabel(axis + ": " + dirStruct[axis])).
+    labels:add(axis, vectortool:addlabel(axis + ": " + dirStruct[axis]:tostring:padright(4))).
     axishlayouts:add(axis, vectortool:addhlayout()).
     sliders:add(axis, axishlayouts[axis]:addhslider(0, -180, 180)).
     buttons:add(axis, axishlayouts[axis]:addbutton("reset")).
@@ -92,12 +86,16 @@ for axis in list("roll", "pitch", "yaw"){
 set labels["roll"]:style:textcolor to yellow.
 set labels["pitch"]:style:textcolor to magenta.
 set labels["yaw"]:style:textcolor to cyan.
+for label in labels:values() {
+    set label:style:align to "CENTER".
+}
 local printhlayout is vectortool:addhlayout().
 local printResultButton is printhlayout:addbutton("Print Rotation").
 set printResultButton:onclick to {printToTerminal(myrot).}.
 printhlayout:addspacing(-1).
 local printRawButton is printhlayout:addbutton("Print Raw").
 set printRawButton:onclick to {printToTerminal(mydir).}.
+printRawButton:enabled off.
 printhlayout:addspacing(-1).
 local printDifferenceButton is printhlayout:addbutton("Print Difference").
 set printDifferenceButton:onclick to {
@@ -108,7 +106,6 @@ set printDifferenceButton:onclick to {
 
 set vectortool:x to guix.
 set vectortool:y to guiy.
-// set mygui:skin:font to guifont.
 
 vectortool:show().
 
@@ -148,7 +145,7 @@ function updateLex {
     parameter rawvalue.
     local value is round(rawvalue).
     set inputLex[key] to value.
-    set labels[key]:text to key + ": " + value.
+    set labels[key]:text to key + ": " + value:tostring:padright(4).
 }
 
 function resetAxis {
