@@ -12,11 +12,11 @@ printToTerminal(list(
     "Press [Abort] at any time to stop launch sequence"
 )).
 
-when abort then {
-    printToTerminal("Launch aborted!").
-    centerHudText("Launch aborted!", 5, red).
-    abortWithMode("padAbort").
-}
+// when abort then {
+//     printToTerminal("Launch aborted!").
+//     centerHudText("Launch aborted!", 5, red).
+//     abortWithMode("padAbort").
+// }
 
 wait until getSingleInput() = "1".
 
@@ -40,11 +40,13 @@ for engine in launchEngines {
     engine:activate().
 }
 wait 0.
-if failedEngines(launchEngines):length {
+if getEnginesStatus(launchEngines,"Failed"):empty {
+    printToTerminal(list("All engines running nominally.", "Releasing launch clamps.")).
+} else {
     printToTerminal("Engine failure detected!").
     wait 1.
     abortWithMode("padAbort").
-} else { printToTerminal(list("All engines running nominally.", "Releasing launch clamps.")). }
+}
 stage.
 
 local function getSingleInput {

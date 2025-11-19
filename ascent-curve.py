@@ -2,15 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 atmosphereHight = 70000
-curvealtitude = atmosphereHight * 0.9
+curvealtitude = 100_000
 startturnaltitude = 1000
-altitude = np.linspace(0, atmosphereHight * 1.2, 1000)
+altitude = np.linspace(0, curvealtitude * 1.2, 1000)
 exponents = {
-    "Steeper Start (0.3)": 0.3,
-    "Steeper Start (0.5)": 0.5,
+    # "Steeper Start (0.3)": 0.3,
+    # "Steeper Start (0.5)": 0.5,
     "Standard Cosine (1.0)": 1.0,
-    "Steeper End (2.0)": 2.0,
-    "Steeper End (3.0)": 3.0,
+    "Steeper End (1.5)": 1.5,
+    # "Steeper End (2.0)": 2.0,
+    # "Steeper End (3.0)": 3.0,
 }
 
 plt.figure(figsize=(10, 6))

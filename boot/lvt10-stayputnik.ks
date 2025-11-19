@@ -3,6 +3,9 @@
 //#include "deployExperiments"
 @lazyGlobal off.
 
+local targetAltitude is 100_000.
+local ascentCurveExponent is 1.0.
+
 wait until homeConnection:isConnected.
 
 if not exists("init.ks") { copyPath("0:init.ks", "1:"). }
@@ -23,8 +26,8 @@ for script in list(
 ) loadScript(script).
 
 local missionPhases is list(
-    { run launch(3). },
-    { run ascent. },
+    { run launch(10). },
+    { run ascent(targetAltitude, ascentCurveExponent). },
     { run deployExperiments. } 
 ).
 
@@ -33,9 +36,3 @@ local abortProcedures is lex(
 ).
 
 execute(missionPhases, abortProcedures).
-
-// local filelist is list().
-// list files in filelist.
-// for file in filelist {
-//     if not (file = "boot") { deletepath(file). }
-// }

@@ -24,7 +24,7 @@ function execute {
         }
     }
     for index in range(missionPhaseIndex, missionPhases:length) {
-        printToTerminal("Starting phase: " +  index + " of " + (missionPhases:length - 1)).
+        printToTerminal("Starting phase: " +  (index + 1) + " of " + (missionPhases:length)).
         storeMissionState("missionPhaseIndex", index).
         missionPhases[index]:call.
     }
